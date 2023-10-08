@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const App = forwardRef((props, ref) => {
   const [folderContents, setFolderContents] = useState([]);
-  const [clickedItemIndices, setClickedItemIndices] = useState([]);
+  const [clickedItemIndex, setClickedItemIndex] = useState(null);
 
 
   const fetchFolderContents = () => {
@@ -24,15 +24,9 @@ const App = forwardRef((props, ref) => {
     fetchFolderContents,
   }));
 
-  const handleDirectoryClick = (content, index, path,level, event,isDirectory) => {
+  const handleDirectoryClick = (content, index, path,level, event) => {
     event.stopPropagation(); // Prevent event propagation
-
-    // Update the clicked item indices for this level
-    setClickedItemIndices((prevIndices) => {
-      const updatedIndices = [...prevIndices];
-      updatedIndices[level] = index;
-      return updatedIndices;
-    });
+    setClickedItemIndex(`${index}_${level}`);
     props.updateCurrentPath(content, path);
   };
 
@@ -45,18 +39,13 @@ const App = forwardRef((props, ref) => {
           return (
             <li
               key={index}
-              onClick={(event) => handleDirectoryClick(item.name, index, fullPath,level, event,item.isDirectory)}
+              onClick={(event) => handleDirectoryClick(item.name, index, fullPath,level, event,)}
               style={{
                 marginLeft: `${level * 20}px`,
-                border: index === clickedItemIndices[level] ? '1px solid black' : 'none',
-                background: index === clickedItemIndices[level] ? 'lightgrey' : 'none',
+                
               }}
             >
-              {item.isDirectory ? (
-                <div>{item.name}/</div>
-              ) : (
-                <div>{item.name}</div>
-              )}
+              <div className={`${index}_${level}`=== clickedItemIndex ? 'selected-item':'not-selected-item'}>{item.isDirectory ? `${item.name}/` : item.name}</div>
               {item.isDirectory && item.contents && renderFolderContents(item.contents, level + 1, fullPath)}
             </li>
           );

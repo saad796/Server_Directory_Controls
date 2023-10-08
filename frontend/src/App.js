@@ -14,13 +14,12 @@ function App() {
 
   const refreshFolderData = ()=>{
     if (folderRefreshRef.current) {
-      folderRefreshRef.current.fetchFolderContents(); // Call the child function via the ref
+      folderRefreshRef.current.fetchFolderContents(); 
     }
   }
 
   const updateCurrentPath = (name,path)=>{
     setCurFile(`/${id}${path}`)
-    console.log(`${name} is clicked present in path ${path}`);
   }
 
   const handleFileInputChange = (e) => {
@@ -28,16 +27,12 @@ function App() {
   };
 
   const handleFileInputBlur = () => {
-    // Remove the input field when it loses focus
     setFileInputVisible(false);
   };
 
   const handleFileInputKeyPress =async (e) => {
-    // Check if the Enter key is pressed
     if (e.key === 'Enter') {
-      // Store the input value in the state
       setFileInputValue(e.target.value);
-
       try {
         const response = await axios.post('http://localhost:8000/newFile', {
           fileName : fileInputValue,
@@ -51,7 +46,6 @@ function App() {
         console.error('Error:', error);
       }
 
-      // Remove the input field
       setFileInputVisible(false);
     }
   };
@@ -61,14 +55,11 @@ function App() {
   };
 
   const handleFolderInputBlur = () => {
-    // Remove the input field when it loses focus
     setFolderInputVisible(false);
   };
 
   const handleFolderInputKeyPress = async (e) => {
-    // Check if the Enter key is pressed
     if (e.key === 'Enter') {
-      // Store the input value in the state
       setFolderInputValue(e.target.value);
       
       try {
@@ -87,7 +78,6 @@ function App() {
         console.error('Error:', error);
       }
 
-      // Remove the input field
       setFolderInputVisible(false);
     }
   };
@@ -103,6 +93,7 @@ function App() {
   return (
     <>
       <div className="btn-container">
+        <button onClick={()=>{setCurFile(`/${id}`)}}>Home</button>
         {fileInputVisible ? (
           <>
             <button onClick={newFile}>File</button>
@@ -112,7 +103,7 @@ function App() {
               onChange={handleFileInputChange}
               onBlur={handleFileInputBlur}
               onKeyPress={handleFileInputKeyPress}
-              autoFocus // Auto-focus the input field
+              autoFocus
             />
           </>
           ) : (
@@ -127,7 +118,7 @@ function App() {
             onChange={handleFolderInputChange}
             onBlur={handleFolderInputBlur}
             onKeyPress={handleFolderInputKeyPress}
-            autoFocus // Auto-focus the input field
+            autoFocus
             />
           </>
         ) : (
