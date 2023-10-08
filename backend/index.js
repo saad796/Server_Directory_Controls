@@ -10,33 +10,44 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+function readDirectoryRecursive(directoryPath) {
+  const files = fs.readdirSync(directoryPath);
+  let folderContents = [];
 
-app.post('/get-folder-contents', (req, res) => {
-    const user = req.body.user_id;
+  files.forEach((file) => {
+    const filePath = path.join(directoryPath, file);
+    const stats = fs.statSync(filePath);
+
+    const item = {
+      name: file,
+      isDirectory: stats.isDirectory(),
+    };
+
+    if (item.isDirectory) {
+      item.contents = readDirectoryRecursive(filePath); // Recursively fetch nested contents
+    }
+
+    folderContents.push(item);
+  });
+
+  return folderContents;
+}
+
+app.get('/get-folder-contents', (req, res) => {
+    const user = req.query.user_id;
     const baseFolder = `userDirectory`;
     const userFolderPath = path.join(__dirname, baseFolder,user);
     console.log(baseFolder , user,userFolderPath);
   
-    fs.readdir(userFolderPath, (err, files) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({error:'Error reading folder contents'});
-      }
-  
-      const folderContents = [];
-  
-      files.forEach((file) => {
-        const filePath = path.join(userFolderPath, file);
-        const stats = fs.statSync(filePath);
-  
-        folderContents.push({
-          name: file,
-          isDirectory: stats.isDirectory(),
-        });
-      });
-      console.log(folderContents);
-      res.json(folderContents);
-    });
+    try {
+      const folderContents = readDirectoryRecursive(userFolderPath);
+      const formattedContents = JSON.stringify(folderContents, null, 1);
+      res.set('Content-Type', 'application/json');
+      res.send(formattedContents);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error reading folder contents' });
+    }
   });
 
 app.post("/newFile",(req,res)=>{

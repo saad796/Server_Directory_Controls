@@ -1,12 +1,11 @@
-import React, { forwardRef, useImperativeHandle,useEffect, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const App = forwardRef((props, ref) => {
   const [folderContents, setFolderContents] = useState([]);
 
-
-const fetchFolderContents = () => {
-    axios.post('http://localhost:8000/get-folder-contents',{user_id:props.userId})
+  const fetchFolderContents = () => {
+    axios.get(`http://localhost:8000/get-folder-contents?user_id=${props.userId}`)
       .then((response) => {
         setFolderContents(response.data);
       })
@@ -16,24 +15,28 @@ const fetchFolderContents = () => {
   };
 
   useEffect(() => {
-    // Fetch folder contents from the server
-    fetchFolderContents()
+    fetchFolderContents();
   }, []);
 
   useImperativeHandle(ref, () => ({
     fetchFolderContents,
   }));
 
-  const renderFolderContents = (contents) => {
-    return contents.map((item, index) => (
-      <div key={index} style={{ marginLeft: item.isDirectory ? '20px' : '0' }}>
-        {item.isDirectory ? (
-          <div>{item.name}/</div>
-        ) : (
-          <div>{item.name}</div>
-        )}
-      </div>
-    ));
+  const renderFolderContents = (contents, level = 0) => {
+    return (
+      <ul>
+        {contents.map((item, index) => (
+          <li key={index} style={{ marginLeft: `${level * 20}px` }}>
+            {item.isDirectory ? (
+              <div>{item.name}/</div>
+            ) : (
+              <div>{item.name}</div>
+            )}
+            {item.isDirectory && item.contents && renderFolderContents(item.contents, level + 1)}
+          </li>
+        ))}
+      </ul>
+    );
   };
 
   return (
@@ -42,6 +45,6 @@ const fetchFolderContents = () => {
       {renderFolderContents(folderContents)}
     </div>
   );
-})
+});
 
 export default App;
