@@ -24,7 +24,7 @@ function readDirectoryRecursive(directoryPath) {
     };
 
     if (item.isDirectory) {
-      item.contents = readDirectoryRecursive(filePath); // Recursively fetch nested contents
+      item.contents = readDirectoryRecursive(filePath); 
     }
 
     folderContents.push(item);
@@ -33,11 +33,29 @@ function readDirectoryRecursive(directoryPath) {
   return folderContents;
 }
 
+//For creating an empty folder for the new user 
+//return boolean on status of folder creation
+function newUserSignin(userId)
+{
+  let folderCreationStatus = false;
+  const baseFolder = `./userDirectory`;
+  const folderPath = path.join(__dirname,baseFolder,userId)
+  console.log(folderPath);
+  fs.mkdir(folderPath, (err) => {
+      if (err) {
+          console.error(err);
+          return(folderCreationStatus);
+      } else {
+          folderCreationStatus=true
+          return(folderCreationStatus);
+      }
+  });
+}
+
 app.get('/get-folder-contents', (req, res) => {
     const user = req.query.user_id;
     const baseFolder = `userDirectory`;
     const userFolderPath = path.join(__dirname, baseFolder,user);
-    console.log(baseFolder , user,userFolderPath);
   
     try {
       const folderContents = readDirectoryRecursive(userFolderPath);

@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const App = forwardRef((props, ref) => {
   const [folderContents, setFolderContents] = useState([]);
+  const [clickedItemIndices, setClickedItemIndices] = useState([]);
+
 
   const fetchFolderContents = () => {
     axios.get(`http://localhost:8000/get-folder-contents?user_id=${props.userId}`)
@@ -22,19 +24,43 @@ const App = forwardRef((props, ref) => {
     fetchFolderContents,
   }));
 
-  const renderFolderContents = (contents, level = 0) => {
+  const handleDirectoryClick = (content, index, path,level, event,isDirectory) => {
+    event.stopPropagation(); // Prevent event propagation
+
+    // Update the clicked item indices for this level
+    setClickedItemIndices((prevIndices) => {
+      const updatedIndices = [...prevIndices];
+      updatedIndices[level] = index;
+      return updatedIndices;
+    });
+    props.updateCurrentPath(content, path);
+  };
+
+
+  const renderFolderContents = (contents, level = 0, parentPath = '') => {
     return (
       <ul>
-        {contents.map((item, index) => (
-          <li key={index} style={{ marginLeft: `${level * 20}px` }}>
-            {item.isDirectory ? (
-              <div>{item.name}/</div>
-            ) : (
-              <div>{item.name}</div>
-            )}
-            {item.isDirectory && item.contents && renderFolderContents(item.contents, level + 1)}
-          </li>
-        ))}
+        {contents.map((item, index) => {
+          const fullPath = parentPath ? `${parentPath}/${item.isDirectory?item.name:""}` :`/${item.isDirectory?item.name:""}`;
+          return (
+            <li
+              key={index}
+              onClick={(event) => handleDirectoryClick(item.name, index, fullPath,level, event,item.isDirectory)}
+              style={{
+                marginLeft: `${level * 20}px`,
+                border: index === clickedItemIndices[level] ? '1px solid black' : 'none',
+                background: index === clickedItemIndices[level] ? 'lightgrey' : 'none',
+              }}
+            >
+              {item.isDirectory ? (
+                <div>{item.name}/</div>
+              ) : (
+                <div>{item.name}</div>
+              )}
+              {item.isDirectory && item.contents && renderFolderContents(item.contents, level + 1, fullPath)}
+            </li>
+          );
+        })}
       </ul>
     );
   };

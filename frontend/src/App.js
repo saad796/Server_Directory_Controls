@@ -18,6 +18,11 @@ function App() {
     }
   }
 
+  const updateCurrentPath = (name,path)=>{
+    setCurFile(`/${id}${path}`)
+    console.log(`${name} is clicked present in path ${path}`);
+  }
+
   const handleFileInputChange = (e) => {
     setFileInputValue(e.target.value);
   };
@@ -131,7 +136,7 @@ function App() {
         
       </div>
       <div className="directory">
-          <Compo userId={id} ref={folderRefreshRef}/>
+          <Compo userId={id} ref={folderRefreshRef} updateCurrentPath={updateCurrentPath}/>
       </div>
     </>
   );
